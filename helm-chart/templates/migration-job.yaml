@@ -2,18 +2,30 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: django-migrate
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade        # Helm chart yüklenmeden veya upgrade edilmeden önce çalışır
+    "helm.sh/hook-weight": "0"                     # Hook önceliği
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded # Job tamamlandıktan sonra temizlenir
 spec:
   ttlSecondsAfterFinished: 100
+  backoffLimit: 3
   template:
     spec:
       restartPolicy: Never
       initContainers:
       - name: wait-for-db
         image: busybox:1.35
-        command: ['sh', '-c', 'until nc -z django-postgres-postgresql 5432; do echo waiting for db; sleep 2; done;']
+        command:
+          - sh
+          - -c
+          - |
+            until nc -z django-postgres-postgresql 5432; do
+              echo "waiting for db..."
+              sleep 2
+            done
       containers:
       - name: migrate
-        image: {{ .Values.image }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"  # values.yaml’dan çekiliyor
         command: ["python", "manage.py", "migrate", "--noinput"]
         envFrom:
         - configMapRef:
@@ -29,4 +41,4 @@ spec:
             secretKeyRef:
               name: django-secret
               key: DATABASE_PASSWORD
-  backoffLimit: 3
+
