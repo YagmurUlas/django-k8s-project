@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: django-migrate
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - name: wait-for-db
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z django-postgres-postgresql 5432; do echo waiting for db; sleep 2; done;']
+      containers:
+      - name: migrate
+        image: {{ .Values.image }}
+        command: ["python", "manage.py", "migrate", "--noinput"]
+        envFrom:
+        - configMapRef:
+            name: django-config
+        env:
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: SECRET_KEY
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DATABASE_PASSWORD
+  backoffLimit: 3

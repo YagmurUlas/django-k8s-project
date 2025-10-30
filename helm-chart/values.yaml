@@ -1,0 +1,7 @@
+replicaCount: 3
+image:
+  repository: yagmurulas/django-app
+  tag: v1
+
+ingress:
+  host: django.local
