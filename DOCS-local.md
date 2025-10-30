@@ -45,7 +45,7 @@ install argocd -> brew install argocd
 argocd login localhost:8080 --username admin --password kS-eIJaYQ4D7PaJo --insecure
 
 
-argocd sync
+## ARGOCD sync
 
 argocd app sync django-app
 

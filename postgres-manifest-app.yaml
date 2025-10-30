@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: django-postgres
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/YagmurUlas/django-k8s-project.git"
+    path: postgres
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
