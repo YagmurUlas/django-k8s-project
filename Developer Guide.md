@@ -430,6 +430,17 @@ ArgoCD will now monitor your Git repository and automatically deploy changes!
 4. For SYNC
 argocd app sync django-app
 
+5. Create ingress for argocd
+file - argocd-ingress.yaml
+
+add domain to /etc/hosts 
+127.0.0.1   argocd.localdev.me
+
+domain - argocd.localdev.me
+
+6. Port forwording for both argocd and django application
+sudo kubectl port-forward -n ingress-nginx svc/ingress-nginx-controller 80:80 443:443
+
 ## Cleanup
 
 To remove everything:
@@ -513,20 +524,6 @@ This local setup has limitations. For production deployment:
 - Use **ResourceQuotas** to prevent resource exhaustion
 - Monitor resource usage and optimize
 
-## Local vs Production Comparison
-
-| Feature | Local (Kind) | Production (Cloud) |
-|---------|-------------|-------------------|
-| Load Balancer | ❌ Port-forward required | ✅ Automatic |
-| Database | 🟡 Single instance | ✅ Managed, HA |
-| SSL/TLS | ❌ Not configured | ✅ Automatic (cert-manager) |
-| Monitoring | ❌ Not included | ✅ Prometheus/Grafana |
-| Logging | ❌ kubectl logs only | ✅ Centralized (ELK/Loki) |
-| Autoscaling | ❌ Fixed replicas | ✅ HPA/VPA enabled |
-| Backups | ❌ Manual | ✅ Automated |
-| Multi-AZ | ❌ Single node | ✅ Multi-zone |
-| CI/CD | 🟡 Manual build | ✅ Automated pipeline |
-
 ## Useful Commands Reference
 
 ```bash
@@ -561,24 +558,3 @@ kubectl get events --sort-by='.lastTimestamp'
 kubectl top pods  # Resource usage
 kubectl top nodes
 ```
-
-## Support
-
-If you encounter issues:
-1. Check the Troubleshooting section
-2. Review pod logs: `kubectl logs <POD_NAME>`
-3. Check events: `kubectl get events`
-4. Verify all pods are Running: `kubectl get pods`
-
-## Conclusion
-
-You now have a production-like Django application running on Kubernetes with:
-- ✅ Multi-node cluster
-- ✅ Database with persistence
-- ✅ Automatic migrations
-- ✅ High availability (3 replicas)
-- ✅ Load balancing
-- ✅ Ingress for HTTP routing
-- ✅ GitOps ready with ArgoCD
-
-The setup demonstrates DevOps best practices while being simple enough to run locally for development and testing.
